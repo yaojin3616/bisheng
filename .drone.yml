@@ -16,7 +16,7 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
       - pip install twine
       - cd ./src/bisheng-langchain
       - python setup.py bdist_wheel
-      - cp dist.* /app/build/
+      - cp dist/* /app/build/
 
   - name: build_backend
     image: python:3.10-slim # 定义创建容器的Docker镜像
