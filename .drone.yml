@@ -30,6 +30,8 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
   - name: build_docker
     image: plugins/docker
     settings:
+      registry: http://192.168.106.8:6082
+      insecure: true
       repo: 192.168.106.8:6082/dataelement/bisheng-backend
       tags: [ latest ]
       context: ./src/backend/
