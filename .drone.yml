@@ -4,8 +4,6 @@ name: cicd # 定义流水线名称
 trigger:
   branch:
   - main
-  event:
-  - push
   
 steps: # 定义流水线执行步骤，这些步骤将顺序执行
   - name: package # 流水线名称
