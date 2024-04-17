@@ -65,7 +65,7 @@ trigger:
   - main
   event:
   - push
-  
+   
 volumes:
 - name: bisheng-cache
   host:
