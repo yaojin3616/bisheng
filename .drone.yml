@@ -3,7 +3,7 @@ type: docker # 定义流水线类型，还有kubernetes、exec、ssh等类型
 name: cicd # 定义流水线名称
 trigger:
   branch:
-  - master
+  - main
   event:
   - push
   
