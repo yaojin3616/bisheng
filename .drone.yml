@@ -26,32 +26,18 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
       - python setup.py bdist_wheel
       - twine upload --verbose -u $NEXUS_USER  -p $NEXUS_PASSWORD --repository-url $REPO  dist/*.whl
 
-  - name: poetry lock
-    image: python:3.10-slim
-    commands:
-      - apt-get install -y curl
-      - curl -sSL https://install.python-poetry.org | python3 -
-      - cd ./src/backend
-      - pip install bisheng_langchain==$RELEASE_VERSION 
-      - sed -i 's/^bisheng_langchain.*/bisheng_langchain = "'$RELEASE_VERSION'"/g' pyproject.toml
-      - poetry lock
     
   - name: build_docker
     image: plugins/docker
     settings:
-      repo: myrepo/myimage
-      tags: [ latest, v1.0 ]
-      context: ./app
-      dockerfile: ./app/Dockerfile
+      repo: 192.168.106.8:6082/dataelement/bisheng-backend
+      tags: [ latest ]
+      context: ./src/backend/
+      dockerfile: ./src/backend/Dockerfile
       username:
-        from_secret: docker_username
+        from_secret: NEXUS_USER
       password:
-        from_secret: docker_password
-    commands:
-      - cd ./src/backend
-      - pip install bisheng_langchain==$RELEASE_VERSION 
-      - sed -i 's/^bisheng_langchain.*/bisheng_langchain = "'$RELEASE_VERSION'"/g' pyproject.toml
-      - poetry lock
+        from_secret: NEXUS_PASSWORD
 
   - name: build-image # 步骤名称
     image: plugins/docker # 使用镜像
