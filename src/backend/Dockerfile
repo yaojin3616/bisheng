@@ -21,6 +21,7 @@ RUN python -m pip install --upgrade pip && \
     pip install shapely==2.0.1 
 
 # Install dependencies
+RUN poetry lock
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction --no-ansi --without dev
 
