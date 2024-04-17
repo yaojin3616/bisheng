@@ -1,9 +1,6 @@
 kind: pipeline # 定义对象类型，还有secret和signature两种类型
 type: docker # 定义流水线类型，还有kubernetes、exec、ssh等类型
 name: cicd # 定义流水线名称
-trigger:
-  branch:
-  - main
   
 steps: # 定义流水线执行步骤，这些步骤将顺序执行
   - name: package # 流水线名称
@@ -25,7 +22,19 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
       - cd ./src/bisheng-langchain
       - python setup.py bdist_wheel
       - twine upload --verbose -u $NEXUS_USER  -p $NEXUS_PASSWORD --repository-url $REPO  dist/*.whl
-
+  
+  - name: set poetry
+    environment:
+      NEXUS_PUBLIC:
+        from_secret: NEXUS_PUBLIC
+      NEXUS_PUBLIC_PASSWORD:
+        from_secret: NEXUS_PUBLIC_PASSWORD
+      REPO:
+        from_secret: PY_NEXUS
+    commands:
+    - cd ./src/backend/
+    - sed -i '23i\RUN poetry source add --priority=supplemental foo http://$NEXUS_PUBLIC:$NEXUS_PUBLIC_PASSWORD@$PY_NEXUS' pyproject.toml
+    - echo pyproject.toml
     
   - name: build_docker
     image: plugins/docker
@@ -50,6 +59,13 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
         from_secret: docker_password
       dockerfile: deploy/Dockerfile # Dockerfile地址， 注意是相对地址
       repo: yxs970707/deploy-web-demo # 镜像名称
+
+trigger:
+  branch:
+  - main
+  event:
+  - push
+  
 volumes:
 - name: bisheng-cache
   host:
