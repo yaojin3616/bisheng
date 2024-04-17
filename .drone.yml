@@ -1,29 +1,55 @@
 kind: pipeline # 定义对象类型，还有secret和signature两种类型
 type: docker # 定义流水线类型，还有kubernetes、exec、ssh等类型
 name: cicd # 定义流水线名称
-
+trigger:
+  branch:
+  - master
+  event:
+  - push
+  
 steps: # 定义流水线执行步骤，这些步骤将顺序执行
   - name: package # 流水线名称
     image: python:3.10-slim # 定义创建容器的Docker镜像
     volumes: # 将容器内目录挂载到宿主机，仓库需要开启Trusted设置
       - name: bisheng-cache
         path: /app/build # 将应用打包好的Jar和执行脚本挂载出来
+    environment:
+      NEXUS_USER:
+        from_secret: NEXUS_USER
+      NEXUS_PASSWORD:
+        from_secret: NEXUS_PASSWORD
+      REPO:
+        from_secret: PY_NEXUS
     commands: # 定义在Docker容器中执行的shell命令
       - pip install Cython
       - pip install wheel
       - pip install twine
       - cd ./src/bisheng-langchain
       - python setup.py bdist_wheel
-      - cp dist/* /app/build/
+      - twine upload --verbose -u $NEXUS_USER  -p $NEXUS_PASSWORD --repository-url $REPO  dist/*.whl
 
-  - name: build_backend
-    image: python:3.10-slim # 定义创建容器的Docker镜像
-    volumes: # 将容器内目录挂载到宿主机，仓库需要开启Trusted设置
-      - name: bisheng-cache
-        path: /app/build # 将应用打包好的Jar和执行脚本挂载出来
+  - name: poetry lock
+    commands:
+      - curl -sSL https://install.python-poetry.org | python3 -
+      - cd ./src/backend
+      - pip install bisheng_langchain==$RELEASE_VERSION 
+      - sed -i 's/^bisheng_langchain.*/bisheng_langchain = "'$RELEASE_VERSION'"/g' pyproject.toml
+      - poetry lock
+    
+  - name: build_docker
+    image: plugins/docker
+    settings:
+      repo: myrepo/myimage
+      tags: [ latest, v1.0 ]
+      context: ./app
+      dockerfile: ./app/Dockerfile
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
     commands:
       - cd ./src/backend
-      - pip install bisheng_langchain==$RELEASE_VERSION
+      - pip install bisheng_langchain==$RELEASE_VERSION 
       - sed -i 's/^bisheng_langchain.*/bisheng_langchain = "'$RELEASE_VERSION'"/g' pyproject.toml
       - poetry lock
 
