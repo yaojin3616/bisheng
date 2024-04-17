@@ -27,6 +27,7 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
       - twine upload --verbose -u $NEXUS_USER  -p $NEXUS_PASSWORD --repository-url $REPO  dist/*.whl
 
   - name: poetry lock
+    image: python:3.10-slim
     commands:
       - curl -sSL https://install.python-poetry.org | python3 -
       - cd ./src/backend
