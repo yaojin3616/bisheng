@@ -35,7 +35,7 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
     commands:
     - cd ./src/backend/
     - sed -i '23i\RUN poetry source add --priority=supplemental foo http://$NEXUS_PUBLIC:$NEXUS_PUBLIC_PASSWORD@$PY_NEXUS' pyproject.toml
-    - echo pyproject.toml
+    - cat pyproject.toml
     
   - name: build_docker
     image: plugins/docker
