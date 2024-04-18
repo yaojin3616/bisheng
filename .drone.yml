@@ -32,10 +32,13 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
         from_secret: NEXUS_PUBLIC_PASSWORD
       REPO:
         from_secret: PY_NEXUS
+      PROXY:
+        from_secret: PROXY
     commands:
     - cd ./src/backend/
-    - sed -i '23i\RUN poetry source add --priority=supplemental foo http://'$NEXUS_PUBLIC':'$NEXUS_PUBLIC_PASSWORD'@'$PY_NEXUS Dockerfile
-    - cat pyproject.toml
+    - sed -i '23i\RUN poetry source add --priority=supplemental foo http://'$NEXUS_PUBLIC':'$NEXUS_PUBLIC_PASSWORD'@'$REPO Dockerfile
+    - sed -i '6i\RUN apt-get update && apt-get install gcc g++ curl build-essential postgresql-server-dev-all -y --option Acquire::HTTP::Proxy='$PROXY Dockerfile
+    - cat Dockerfile
     
   - name: build_docker
     image: plugins/docker
