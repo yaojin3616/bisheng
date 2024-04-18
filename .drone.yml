@@ -74,6 +74,9 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
       tags: [ latest ]
       context: ./src/backend/
       dockerfile: ./src/backend/Dockerfile
+      volumes:
+        - name: socket
+          path: /var/run/docker.sock
       username:
         from_secret: NEXUS_USER
       password:
@@ -90,4 +93,6 @@ volumes:
 - name: apt-cache
   host:
     path: /opt/drone/data/bisheng/apt/
-    
+- name: socket
+  host:
+    path: /var/run/docker.sock
