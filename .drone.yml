@@ -38,7 +38,7 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
         from_secret: APT-GET
     commands:
     - cd ./src/backend/
-    - REPO=`echo $REPO| sed 's/http:\/\///g`
+    - REPO=`echo $REPO| sed 's/http:\/\///g'`
     - sed -i '23i\RUN poetry source add --priority=supplemental foo http://'$NEXUS_PUBLIC':'$NEXUS_PUBLIC_PASSWORD'@'$REPO Dockerfile
     - sed -i '23i\RUN poetry source add --priority=primary qh https://pypi.tuna.tsinghua.edu.cn/simple Dockerfile
     - sed -i '6i\RUN apt-get update && apt-get install gcc g++ curl build-essential postgresql-server-dev-all -y --option Acquire::HTTP::Proxy='$PROXY Dockerfile
