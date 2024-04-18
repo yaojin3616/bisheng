@@ -40,9 +40,11 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
     - cd ./src/backend/
     - echo $REPO
     - REPO2=$(echo $REPO | sed 's/http:\\/\\///g')
+    - sed -i '6i\ENV http_proxy='$PROXY Dockerfile
+    - sed -i '6i\ENV https_proxy='$PROXY Dockerfile
+    - sed -i '6i\pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple' Dockerfile
     - sed -i '23i\RUN poetry source add --priority=supplemental foo http://'$NEXUS_PUBLIC':'$NEXUS_PUBLIC_PASSWORD'@'$REPO2'simple' Dockerfile
     - sed -i '23i\RUN poetry source add --priority=primary qh https://pypi.tuna.tsinghua.edu.cn/simple' Dockerfile
-    - sed -i '6i\RUN apt-get update && apt-get install gcc g++ curl build-essential postgresql-server-dev-all -y --option Acquire::HTTP::Proxy='$PROXY Dockerfile
     - cat Dockerfile
     
   - name: build_docker
@@ -59,16 +61,6 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
         from_secret: NEXUS_USER
       password:
         from_secret: NEXUS_PASSWORD
-
-  - name: build-image # 步骤名称
-    image: plugins/docker # 使用镜像
-    settings: # 当前设置
-      username: # 账号名称
-        from_secret: docker_username
-      password: # 账号密码
-        from_secret: docker_password
-      dockerfile: deploy/Dockerfile # Dockerfile地址， 注意是相对地址
-      repo: yxs970707/deploy-web-demo # 镜像名称
 
 trigger:
   branch:
