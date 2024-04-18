@@ -3,6 +3,16 @@ type: docker # 定义流水线类型，还有kubernetes、exec、ssh等类型
 name: cicd # 定义流水线名称
   
 steps: # 定义流水线执行步骤，这些步骤将顺序执行
+  - name: fetch
+    image: alpine/git
+    environment:
+      http_proxy: 
+        from_secret: PROXY
+      https_proxy:
+        from_secret: PROXY
+    commands:
+    - git fetch --tags
+
   - name: package # 流水线名称
     pull: if-not-exists
     image: python:3.10-slim # 定义创建容器的Docker镜像
